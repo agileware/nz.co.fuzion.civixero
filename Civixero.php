@@ -446,9 +446,14 @@ function _civixero_get_connectors() {
   if (empty($connectors)) {
     try {
       $connectors = civicrm_api3('connector', 'get', array('connector_type_id' => 'CiviXero'));
+    }
+    catch(Exception $e) {
+      return array(0 => 0);
+    }
+    if ($connectors['count']) {
       $connectors = $connectors['values'];
     }
-    catch (CiviCRM_API3_Exception $e) {
+    else {
       $connectors = array(0 => 0);
     }
   }
