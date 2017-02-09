@@ -53,7 +53,7 @@ class CRM_Civixero_Contact extends CRM_Civixero_Base {
             try {
               $existing = civicrm_api3('account_contact', 'getsingle', array(
                 'return' => 'id',
-                'contact_id' => $contact['ContactNumber'],
+                'contact_id' => CRM_Utils_Array::value('ContactNumber', $contact),
                 'plugin' => $this->_plugin,
               ));
               if (!empty($existing['accounts_contact_id']) && $existing['accounts_contact_id'] != $contact['ContactID']) {
