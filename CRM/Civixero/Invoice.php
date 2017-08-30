@@ -200,7 +200,7 @@ class CRM_Civixero_Invoice extends CRM_Civixero_Base {
         $lineItems[$index]['UnitAmount'] = -$lineItem['UnitAmount'];
       }
     }
-    
+
     // Get default Invoice status
     $status = civicrm_api('setting', 'getvalue', array(
         'group' => 'Xero Settings',
@@ -236,7 +236,7 @@ class CRM_Civixero_Invoice extends CRM_Civixero_Base {
       );
 
       if (!empty($invoice_settings['due_date']) && $invoice_settings['due_date_period'] != 'select') {
-        $new_invoice['DueDate'] = strftime('%Y-%m-%d', strtotime($invoiceData['receive_date'] . ' ' . $invoice_settings['due_date'] . ' ' . $invoice_settings['due_date_period']));
+        $new_invoice['DueDate'] = strftime('%Y-%m-%d', strtotime($invoiceData['receive_date'] . ' + ' . $invoice_settings['due_date'] . ' ' . $invoice_settings['due_date_period']));
       }
     }
     catch (Exception $e) {
