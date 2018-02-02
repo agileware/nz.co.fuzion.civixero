@@ -35,7 +35,6 @@ class CRM_Civixero_Contact extends CRM_Civixero_Base {
             'plugin' => 'xero',
             'accounts_contact_id' => $contact['ContactID'],
             'accounts_data' => json_encode($contact),
-            'accounts_needs_update' => 0,
           );
           CRM_Accountsync_Hook::accountPullPreSave('contact', $contact, $save, $params);
           if (!$save) {
@@ -78,7 +77,7 @@ class CRM_Civixero_Contact extends CRM_Civixero_Base {
       }
     }
     catch (CRM_Civixero_Exception_XeroThrottle $e) {
-      throw new CRM_Core_Exception('Invoice Pull aborted due to throttling by Xero');
+      throw new CRM_Core_Exception('Contact Pull aborted due to throttling by Xero');
     }
   }
 
@@ -171,7 +170,7 @@ class CRM_Civixero_Contact extends CRM_Civixero_Base {
       return TRUE;
     }
     catch (CRM_Civixero_Exception_XeroThrottle $e) {
-      throw new CRM_Core_Exception('Invoice Pull aborted due to throttling by Xero');
+      throw new CRM_Core_Exception('Contact Push aborted due to throttling by Xero');
     }
   }
 
