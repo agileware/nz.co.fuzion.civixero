@@ -221,6 +221,7 @@ function civixero_civicrm_pageRun(&$page) {
     return;
   }
 
+  CRM_Core_Resources::singleton()->addScriptFile('nz.co.fuzion.civixero','js/civixero.js');
   if(($contactID = $page->getVar('_contactId')) != FALSE) {
     $connectors = _civixero_get_connectors();
     $xeroBlock = '';
@@ -238,7 +239,7 @@ function civixero_civicrm_pageRun(&$page) {
       foreach ($account_contacts['values'] as $account_contact) {
         $prefix = _civixero_get_connector_prefix($account_contact['connector_id']);
         if (!empty($account_contact['accounts_contact_id'])) {
-          $xeroBlock .= _civixero_get_xero_links_block($account_contact['accounts_contact_id'], $prefix);
+          $xeroBlock .= _civixero_get_xero_links_block($account_contact['id'], $account_contact['accounts_contact_id'], $prefix);
         }
         elseif (!empty($account_contact['accounts_needs_update'])) {
           $xeroBlock .= _civicrm_get_xero_block_header();
@@ -326,21 +327,27 @@ function _civixero_get_connectors() {
  *
  * @return string
  */
-function _civixero_get_xero_links_block($xeroID, $connector_name) {
+function _civixero_get_xero_links_block($entityId, $xeroID, $connector_name) {
   $xeroLinks = array(
     'view_transactions' => array(
       'link' => 'https://go.xero.com/Reports/report.aspx?reportId=be392447-762b-444d-9cde-87c6bd185d00&report=TransactionsByContact&invoiceType=INVOICETYPE%2fACCREC&addToReportId=cf6fedeb-2188-493c-96e2-b862198f9b46&addToReportTitle=Income+by+Contact&reportClass=TransactionsByContact&contact=',
       'link_label' => 'Xero Transactions',
+      'link_delete' => '',
     ),
     'view_contact' => array(
       'link' => 'https://go.xero.com/Contacts/View.aspx?contactID=',
       'link_label' => 'Xero Contact',
+      'link_delete' => '<i class="crm-i fa-remove"></i>'
     )
   );
 
   $xeroBlock = _civicrm_get_xero_block_header() . $connector_name;
   foreach ($xeroLinks as $link) {
-    $xeroBlock .= "<div class='crm-content'><a href='{$link['link']}{$xeroID}'>{$link['link_label']}</a></div>";
+    $xeroBlock .= "<div class='crm-content'><a href='{$link['link']}{$xeroID}'>{$link['link_label']}</a>";
+    if (CRM_Core_Permission::check("administer CiviCRM")) {
+      $xeroBlock .= "&nbsp; <a href='#' data-xeroid='{$entityId}' class='unlink-xerocontact'><span class='error'>{$link['link_delete']}</span></a>";
+    }
+    $xeroBlock .= "</div>";
   }
 
   $xeroBlock .= "</div>";
@@ -366,12 +373,21 @@ function civixero_civicrm_searchColumns( $objectName, &$headers,  &$values, &$se
   if ($objectName == 'contribution') {
     foreach ($values as &$value) {
       try {
-        $invoiceID = civicrm_api3('AccountInvoice', 'getvalue', array(
+        $invoiceID = civicrm_api3('AccountInvoice', 'get', array(
           'plugin' => 'xero',
           'contribution_id' => $value['contribution_id'],
-          'return' => 'accounts_invoice_id',
+          'return' => array('accounts_invoice_id', 'id'),
+          'sequential' => TRUE,
         ));
-        $value['contribution_status'] .= "<a href='https://go.xero.com/AccountsReceivable/View.aspx?InvoiceID=" . $invoiceID . "'> <p>Xero</p></a>";
+        if ($invoiceID["count"]) {
+          $invoiceID = $invoiceID["values"][0];
+          if (isset($invoiceID["accounts_invoice_id"])) {
+            $value['contribution_status'] .= "<a href='https://go.xero.com/AccountsReceivable/View.aspx?InvoiceID=" . $invoiceID["accounts_invoice_id"] . "'> Xero</a>";
+            if (CRM_Core_Permission::check("administer CiviCRM")) {
+              $value['contribution_status'] .= "&nbsp; <a href='#' data-xeroid='{$invoiceID["id"]}' class='unlink-xeroinvoice'><span class='error'><i class='crm-i fa-remove'></i></span></a>";
+            }
+          }
+        }
       }
       catch (Exception $e) {
         continue;
