@@ -17,7 +17,7 @@ CRM.$(function($) {
                     CRM.alert(result.error_message,title,"error");
                 } else {
                     CRM.alert("Contact has been unlinked successfully.",title,"success");
-                    CRM.tabHeader.resetTab("#tab_summary", true);
+                    window.location.href = '';
                 }
             }).fail(function(result) {
                 CRM.alert("Error occured, Please try again!",title,"error");
