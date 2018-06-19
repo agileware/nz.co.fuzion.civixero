@@ -103,6 +103,7 @@ class CRM_Civixero_Page_AJAX extends CRM_Core_Page {
             $errordata = $accountcontact["error_data"];
             $errordata = json_decode($errordata, TRUE);
             $errordata["error_cleared"] = 1;
+            $accountcontact["accounts_needs_update"] = 0;
             $accountcontact["error_data"] = json_encode($errordata);
 
             civicrm_api3("AccountContact","create",$accountcontact);
@@ -129,6 +130,7 @@ class CRM_Civixero_Page_AJAX extends CRM_Core_Page {
             $errordata = $accountinvoice["error_data"];
             $errordata = json_decode($errordata, TRUE);
             $errordata["error_cleared"] = 1;
+            $accountinvoice["accounts_needs_update"] = 0;
             $accountinvoice["error_data"] = json_encode($errordata);
             civicrm_api3("AccountInvoice","create",$accountinvoice);
         }
