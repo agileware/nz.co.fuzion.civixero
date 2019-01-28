@@ -141,7 +141,7 @@ class CRM_Civixero_Contact extends CRM_Civixero_Base {
                 $record['id'] = $matching['id'];
               }
               elseif($matching['contact_id'] != $record['contact_id']) {
-                throw new CiviCRM_API3_Exception(ts('Attempt to sync Contact %1 to Xero entry for existing Contact %2. ', array(1 => $record['contact_id'], 2 => $matching['contact_id']), NULL, $record));
+                throw new CiviCRM_API3_Exception(ts('Attempt to sync Contact %1 to Xero entry for existing Contact %2. ', array(1 => $record['contact_id'], 2 => $matching['contact_id']), NULL, $record), 'xero_dup_contact');
               }
             }
 
