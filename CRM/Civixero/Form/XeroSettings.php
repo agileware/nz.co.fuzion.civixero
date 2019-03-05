@@ -47,8 +47,27 @@ class CRM_Civixero_Form_XeroSettings extends CRM_Core_Form {
   }
   function postProcess() {
     $this->_submittedValues = $this->exportValues();
+    $this->fetchAndSaveKey('xero_public_certificate');
+    $this->fetchAndSaveKey('xero_private_key');
     $this->saveSettings();
     parent::postProcess();
+    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/xero/settings'));
+  }
+
+  /**
+   * Fetch and save the uploaded public/private key values.
+   * @param $keyName
+   */
+  function fetchAndSaveKey($keyName) {
+    if (!isset($this->_submitFiles[$keyName])) {
+      return;
+    }
+    $key = $this->_submitFiles[$keyName];
+
+    if (isset($key['tmp_name']) && $key['tmp_name'] != '') {
+      $keyContent = file_get_contents($key['tmp_name']);
+      $this->_submittedValues[$keyName] = $keyContent;
+    }
   }
 
   /**
@@ -107,6 +126,13 @@ class CRM_Civixero_Form_XeroSettings extends CRM_Core_Form {
     $domainID = CRM_Core_Config::domainID();
     foreach ($existing['values'][$domainID] as $name => $value) {
       $defaults[$name] = $value;
+    }
+    if (isset($defaults['xero_public_certificate']) && $defaults['xero_public_certificate'] != '') {
+      $this->assign('hasPublicKeySaved', TRUE);
+    }
+
+    if (isset($defaults['xero_private_key']) && $defaults['xero_private_key'] != '') {
+      $this->assign('hasPrivateKeySaved', TRUE);
     }
     return $defaults;
   }

@@ -9,7 +9,31 @@
 {foreach from=$elementNames item=elementName}
   <div class="crm-section">
     <div class="label">{$form.$elementName.label}</div>
-    <div class="content">{$form.$elementName.html}</div>
+    <div class="content">
+      {$form.$elementName.html}
+      {if $elementName == 'xero_public_certificate'}
+        <br><br>
+        <div class="{if $hasPublicKeySaved != ''}help{else}status{/if}">
+          {if $hasPublicKeySaved != ''}
+            <p>Public certificate is uploaded, If you want to change the Xero public certificate please reupload the file.</p>
+          {else}
+            <p>Public certificate is not uploaded, To sync contacts and contributions with Xero please upload the Xero public certificate file.</p>
+          {/if}
+        </div>
+      {/if}
+
+      {if $elementName == 'xero_private_key'}
+        <br><br>
+        <div class="{if $hasPrivateKeySaved != ''}help{else}status{/if}">
+          {if $hasPublicKeySaved != ''}
+            <p>Private key is uploaded, If you want to change the Xero private key please reupload the file.</p>
+          {else}
+            <p>Private key is not uploaded, To sync contacts and contributions with Xero please upload the Xero private key file.</p>
+          {/if}
+        </div>
+      {/if}
+
+    </div>
     <div class="clear"></div>
   </div>
 {/foreach}
