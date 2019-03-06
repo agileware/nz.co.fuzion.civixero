@@ -17,7 +17,11 @@
           {if $hasPublicKeySaved != ''}
             <p>Public certificate is uploaded, If you want to change the Xero public certificate please reupload the file.</p>
           {else}
-            <p>Public certificate is not uploaded, To sync contacts and contributions with Xero please upload the Xero public certificate file.</p>
+            {if $showPublicUpgradeMessage}
+                <a href="{crmURL p='civicrm/admin/extensions/upgrade' }">Execute the updates</a> to copy the Xero public certificate in database.
+            {else}
+                <p>Public certificate is not uploaded, To sync contacts and contributions with Xero please upload the Xero public certificate file.</p>
+            {/if}
           {/if}
         </div>
       {/if}
@@ -28,7 +32,11 @@
           {if $hasPublicKeySaved != ''}
             <p>Private key is uploaded, If you want to change the Xero private key please reupload the file.</p>
           {else}
-            <p>Private key is not uploaded, To sync contacts and contributions with Xero please upload the Xero private key file.</p>
+            {if $showPrivateUpgradeMessage}
+                <a href="{crmURL p='civicrm/admin/extensions/upgrade' }">Execute the updates</a> to copy the Xero private key in database.
+            {else}
+                <p>Private key is not uploaded, To sync contacts and contributions with Xero please upload the Xero private key file.</p>
+            {/if}
           {/if}
         </div>
       {/if}

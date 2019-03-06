@@ -128,11 +128,21 @@ class CRM_Civixero_Form_XeroSettings extends CRM_Core_Form {
       $defaults[$name] = $value;
     }
     if (isset($defaults['xero_public_certificate']) && $defaults['xero_public_certificate'] != '') {
-      $this->assign('hasPublicKeySaved', TRUE);
+      if (!is_file($defaults['xero_public_certificate'])) {
+        $this->assign('hasPublicKeySaved', TRUE);
+      }
+      else {
+        $this->assign('showPublicUpgradeMessage', TRUE);
+      }
     }
 
     if (isset($defaults['xero_private_key']) && $defaults['xero_private_key'] != '') {
-      $this->assign('hasPrivateKeySaved', TRUE);
+      if (!is_file($defaults['xero_private_key'])) {
+        $this->assign('hasPrivateKeySaved', TRUE);
+      }
+      else {
+        $this->assign('showPrivateUpgradeMessage', TRUE);
+      }
     }
     return $defaults;
   }

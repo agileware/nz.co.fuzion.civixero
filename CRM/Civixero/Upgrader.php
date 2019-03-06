@@ -130,4 +130,30 @@ class CRM_Civixero_Upgrader extends CRM_Civixero_Upgrader_Base {
     return TRUE;
   } // */
 
+  /**
+   * Copy the content of public/private key from files into DB.
+   *
+   * @return bool
+   */
+  public function upgrade_1200() {
+    $this->ctx->log->info('Applying update v1.2');
+    $publicCertificate = Civi::settings()->get('xero_public_certificate');
+    $privateCertificate = Civi::settings()->get('xero_private_key');
+
+    if (is_file($publicCertificate)) {
+      $publicCertificate = file_get_contents($publicCertificate);
+    }
+    if (is_file($privateCertificate)) {
+      $privateCertificate = file_get_contents($privateCertificate);
+    }
+
+    Civi::settings()->set('xero_public_certificate', $publicCertificate);
+    Civi::settings()->set('xero_private_key', $privateCertificate);
+
+    CRM_Core_Session::setStatus('Xero public certificate and private key has been copied into database, Files can be deleted from the system.', 'Xero Public & Private Key stored in Database', 'alert', array(
+      'expires' => 0,
+    ));
+
+    return TRUE;
+  }
 }
