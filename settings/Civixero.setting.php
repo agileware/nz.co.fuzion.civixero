@@ -125,4 +125,16 @@ return array(
     'quick_form_type' => 'Element',
     'html_attributes' => $invoice_statuses,
   ),
+  'xero_email_invoice' => array(
+    'group_name' => 'Xero Settings',
+    'group' => 'xero',
+    'name' => 'xero_email_invoice',
+    'type' => 'Boolean',
+    'quick_form_type' => 'YesNo',
+    'default' => '0',
+    'html_type' => 'radio',
+    'title' => 'Email invoice from Xero',
+    'description' => 'When checked, an invoice email will be sent to the primary email address of the contact.',
+    'help_text' => '',
+  ),
  );

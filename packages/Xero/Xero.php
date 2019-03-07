@@ -171,27 +171,7 @@ class Xero {
 				return $temp_xero_response;
 
 			}
-
-			try {
-			if(@simplexml_load_string( $temp_xero_response )==false){
-				throw new XeroException($temp_xero_response);
-				$xero_xml = false;
-				}else{
-				$xero_xml = simplexml_load_string( $temp_xero_response );
-				}
-				}
-
-			catch (XeroException $e)
-				  {
-				  return $e->getMessage() . "<br/>";
-				  }
-
-
-			if ( $this->format == 'xml' && isset($xero_xml) ) {
-				return $xero_xml;
-			} elseif(isset($xero_xml)) {
-				return ArrayToXML::toArray( $xero_xml );
-			}
+			return $this->processXeroResponse($temp_xero_response);
 		} elseif ( (count($arguments) == 1) || ( is_array($arguments[0]) ) || ( is_a( $arguments[0], 'SimpleXMLElement' ) ) ) {
 			//it's a POST or PUT request
 			if ( !(in_array($name, $valid_post_methods) || in_array($name, $valid_put_methods)) ) {
@@ -232,36 +212,73 @@ class Xero {
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$xero_response = curl_exec($ch);
 			if (isset($fh)) fclose($fh);
-			try {
-			if(@simplexml_load_string( $xero_response )==false){
-				throw new XeroException($xero_response);
+      curl_close($ch);
 
-				}else{
-				$xero_xml = simplexml_load_string( $xero_response );
-				}
-				}
-
-			catch (XeroException $e)
-				  {
-				  //display custom message
-				  return $e->getMessage() . "<br/>";
-				  }
-
-			curl_close($ch);
-			if (!isset($xero_xml) ) {
-				return false;
-			}
-			if ( $this->format == 'xml' && isset($xero_xml)) {
-				return $xero_xml;
-			} elseif(isset($xero_xml)) {
-				return ArrayToXML::toArray( $xero_xml );
-			}
+      return $this->processXeroResponse($xero_response);
 		} else {
 			return false;
 		}
 
 
 	}
+
+  /**
+   * Email invoice from Xero to user.
+   *
+   * @param $invoiceId
+   * @return array|bool|SimpleXMLElement|string
+   * @throws OAuthException
+   */
+	public function EmailInvoice($invoiceId) {
+    $method = 'Invoices';
+    $xero_url = self::ENDPOINT . $method . '/' . $invoiceId . '/Email';
+    $req  = OAuthRequest::from_consumer_and_token( $this->consumer, $this->token, 'POST',$xero_url );
+    $req->sign_request($this->signature_method , $this->consumer, $this->token);
+
+    $ch = curl_init();
+    curl_setopt($ch,CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_URL, $xero_url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $req->to_postdata() );
+    curl_setopt($ch, CURLOPT_HEADER, $req->to_header());
+
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $xero_response = curl_exec($ch);
+    curl_close($ch);
+    return $this->processXeroResponse($xero_response);
+  }
+
+  /**
+   * Process the response from Xero and return appropriate response.
+   *
+   * @param $xero_response
+   * @return array|bool|SimpleXMLElement|string
+   */
+  private function processXeroResponse($xero_response) {
+    try {
+      if(@simplexml_load_string( $xero_response )==false){
+        throw new XeroException($xero_response);
+
+      }else{
+        $xero_xml = simplexml_load_string( $xero_response );
+      }
+    }
+
+    catch (XeroException $e)
+    {
+      //display custom message
+      return $e->getMessage() . "<br/>";
+    }
+
+    if (!isset($xero_xml) ) {
+      return false;
+    }
+    if ( $this->format == 'xml' && isset($xero_xml)) {
+      return $xero_xml;
+    } elseif(isset($xero_xml)) {
+      return ArrayToXML::toArray( $xero_xml );
+    }
+  }
 
 	public function __get($name) {
 		return $this->$name();

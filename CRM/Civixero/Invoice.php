@@ -142,6 +142,7 @@ class CRM_Civixero_Invoice extends CRM_Civixero_Base {
         try {
           $accountsInvoice = $this->getAccountsInvoice($record);
           $result = $this->pushToXero($accountsInvoice, $params['connector_id']);
+          $this->emailXeroInvoice($result, $params['connector_id']);
           $responseErrors = $this->savePushResponse($result, $record);
         }
         catch (CiviCRM_API3_Exception $e) {
@@ -434,6 +435,38 @@ class CRM_Civixero_Invoice extends CRM_Civixero_Base {
       ));
     }
     return $this->default_account_code;
+  }
+
+  /**
+   * Email the created invoice to User from Xero if setting is turned on.
+   *
+   * @param $result
+   * @param $connector_id
+   * @return bool
+   * @throws CRM_Civixero_Exception_XeroThrottle
+   */
+  protected function emailXeroInvoice($result, $connector_id) {
+    if ($result === FALSE) {
+      return FALSE;
+    }
+    $responseErrors = $this->validateResponse($result);
+    $invoiceId = "";
+
+    if (!$responseErrors) {
+      if (isset($result['BankTransactions'])) {
+        $invoiceId = $result['BankTransactions']['BankTransaction']['BankTransactionID'];
+      }
+      else if (empty($record['accounts_invoice_id']) && !empty($result['Invoices']['Invoice']['InvoiceID'])) {
+        $invoiceId = $result['Invoices']['Invoice']['InvoiceID'];
+      }
+
+      $emailInvoiceFromXero = Civi::settings()->get('xero_email_invoice');
+
+      if($invoiceId != "" && $emailInvoiceFromXero) {
+        // Email invoice from Xero if we have invoice id and setting is turned on.
+        $result = $this->getSingleton($connector_id)->EmailInvoice($invoiceId);
+      }
+    }
   }
 
   /**
